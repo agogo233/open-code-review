@@ -226,7 +226,12 @@ func (a *Agent) Run(ctx context.Context) ([]model.LlmComment, error) {
 	telemetry.SetAttr(diffSpan, "lines.deleted", int64(a.totalDeletions))
 	diffSpan.End()
 
+	totalChanged := len(a.diffs)
+	reviewCount := a.countReviewable(a.diffs)
+	fmt.Fprintf(stdout.Writer(), "[ocr] %d file(s) changed, reviewing %d in %s\n", totalChanged, reviewCount, a.args.RepoDir)
+
 	a.diffs = a.filterUnsupportedExts(a.diffs)
+	a.diffs = a.filterExcludedPaths(a.diffs)
 
 	if len(a.diffs) == 0 {
 		fmt.Fprintln(stdout.Writer(), "[ocr] No supported files changed. Skipping review.")
@@ -236,16 +241,8 @@ func (a *Agent) Run(ctx context.Context) ([]model.LlmComment, error) {
 	}
 
 	a.currentDate = time.Now().Format("2006-01-02 15:04")
-
-	reviewCount := 0
-	for _, d := range a.diffs {
-		if !d.IsDeleted {
-			reviewCount++
-		}
-	}
-	fmt.Fprintf(stdout.Writer(), "[ocr] %d file(s) changed, reviewing %d in %s\n", len(a.diffs), reviewCount, a.args.RepoDir)
 	telemetry.Event(ctx, "review.started",
-		telemetry.AnyToAttr("file.count", len(a.diffs)),
+		telemetry.AnyToAttr("file.count", totalChanged),
 		telemetry.AnyToAttr("review.count", reviewCount),
 		telemetry.AnyToAttr("repo.dir", a.args.RepoDir))
 
@@ -571,6 +568,29 @@ func (a *Agent) filterLargeDiffs(diffs []model.Diff) []model.Diff {
 	return kept
 }
 
+// countReviewable counts diffs that will survive both filters and are not pure deletions.
+func (a *Agent) countReviewable(diffs []model.Diff) int {
+	count := 0
+	for _, d := range diffs {
+		path := d.NewPath
+		if path == "/dev/null" {
+			path = d.OldPath
+		}
+		ext := a.extFromPath(path)
+		if ext != "" && !allowedext.IsAllowedExt(ext) {
+			continue
+		}
+		if allowedext.IsExcludedPath(path) {
+			continue
+		}
+		if d.IsDeleted {
+			continue
+		}
+		count++
+	}
+	return count
+}
+
 // filterUnsupportedExts drops diffs whose file extensions are not in the supported types allowlist.
 func (a *Agent) filterUnsupportedExts(diffs []model.Diff) []model.Diff {
 	var kept []model.Diff
@@ -592,6 +612,30 @@ func (a *Agent) filterUnsupportedExts(diffs []model.Diff) []model.Diff {
 
 	if skipped > 0 {
 		fmt.Fprintf(stdout.Writer(), "[ocr] Skipped %d file(s) with unsupported extensions\n", skipped)
+	}
+	return kept
+}
+
+// filterExcludedPaths drops diffs whose file paths match any default exclude pattern.
+func (a *Agent) filterExcludedPaths(diffs []model.Diff) []model.Diff {
+	var kept []model.Diff
+	skipped := 0
+
+	for _, d := range diffs {
+		path := d.NewPath
+		if path == "/dev/null" {
+			path = d.OldPath
+		}
+		if allowedext.IsExcludedPath(path) {
+			fmt.Fprintf(stdout.Writer(), "[ocr] Skipping %s — matches exclude pattern\n", path)
+			skipped++
+			continue
+		}
+		kept = append(kept, d)
+	}
+
+	if skipped > 0 {
+		fmt.Fprintf(stdout.Writer(), "[ocr] Excluded %d file(s) by pattern\n", skipped)
 	}
 	return kept
 }
