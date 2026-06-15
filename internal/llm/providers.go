@@ -91,6 +91,20 @@ var registry = []Provider{
 			"mimo-v2-flash",
 		},
 	},
+	{
+		Name:        "minimax",
+		DisplayName: "MiniMax API",
+		Protocol:    "openai",
+		BaseURL:     "https://api.minimaxi.com/v1",
+		EnvVar:      "MINIMAX_API_KEY",
+		Models: []string{
+			"MiniMax-M3",
+			"MiniMax-M2.7",
+			"MiniMax-M2.7-highspeed",
+			"MiniMax-M2.5",
+			"MiniMax-M2.5-highspeed",
+		},
+	},
 }
 
 var registryMap map[string]Provider
