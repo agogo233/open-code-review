@@ -53,7 +53,7 @@ export const en: TranslationKeys = {
   'features.feat2Title': 'Precise Comment Positioning & Reflection',
   'features.feat2Desc': 'An independent line-level comment positioning module with a 3-tier progressive LLM strategy pinpoints each comment to exact line numbers. A separate reflection module intercepts hallucinations and knowledge drift early.',
   'features.feat3Title': 'Multi-Model Protocol Support',
-  'features.feat3Desc': 'Supports both Anthropic Messages API and OpenAI Chat Completions API. Connect custom model endpoints.',
+  'features.feat3Desc': 'Supports both Anthropic Messages API and OpenAI Chat Completions API. Ships with preset providers including Anthropic, OpenAI, DashScope, DeepSeek, and Z.AI for out-of-the-box use, while also supporting custom model endpoints for private deployments.',
   'features.feat4Title': 'Dynamic Concurrent Processing',
   'features.feat4Desc': 'Dynamically splits sub-tasks for parallel review with configurable goroutine workers (default 8). Even large changesets complete quickly.',
   'features.feat5Title': 'Smart Memory Compression',

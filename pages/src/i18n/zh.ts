@@ -53,7 +53,7 @@ export const zh: TranslationKeys = {
   'features.feat2Title': '精确的评论定位与反思',
   'features.feat2Desc': '独立的行级评论定位模块，基于三级递进策略的 LLM 评论精确定位机制，将每条评审意见都精确到具体行号，结构化输出让修复更高效；独立的评论反思模块，提前拦截模型发生的知识遗忘或逻辑幻觉等。',
   'features.feat3Title': '多模型协议支持',
-  'features.feat3Desc': '同时支持 Anthropic Messages API 和 OpenAI Chat Completions API。可接入自定义模型端点。',
+  'features.feat3Desc': '同时支持 Anthropic Messages API 和 OpenAI Chat Completions API。内置 Anthropic、OpenAI、DashScope、DeepSeek、Z.AI 等预设供应商，开箱即用；同时支持接入任意自定义模型端点，灵活适配私有化部署场景。',
   'features.feat4Title': '动态并发处理',
   'features.feat4Desc': '动态拆分子任务并行评审，可配置 goroutine worker 数量（默认 8 个）。大变更集也能快速完成。',
   'features.feat5Title': '智能记忆压缩',
