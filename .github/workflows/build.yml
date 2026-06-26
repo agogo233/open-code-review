@@ -1,0 +1,37 @@
+name: Build Linux AMD64
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: self-hosted
+    container:
+      image: golang:1.26.4
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trust workspace
+        run: git config --global safe.directory '*'
+
+      - name: Build
+        env:
+          GOOS: linux
+          GOARCH: amd64
+          CGO_ENABLED: '0'
+        run: |
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          LD_FLAGS="-s -w -X main.GitCommit=${GIT_COMMIT} -X main.BuildDate=${BUILD_DATE}"
+          BIN_NAME=opencodereview-linux-amd64
+          go build -ldflags "${LD_FLAGS}" -o "${BIN_NAME}" ./cmd/opencodereview
+          echo "bin_name=${BIN_NAME}" >> $GITHUB_ENV
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binary-linux-amd64
+          path: ${{ env.bin_name }}
