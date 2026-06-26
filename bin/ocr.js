@@ -28,7 +28,7 @@ try {
   }
 } catch (_) {}
 
-if (!process.env.OCR_NO_UPDATE) {
+if (process.env.OCR_UPDATE_CHECK === "1") {
   const stateDir = path.join(os.homedir(), ".opencodereview");
   const tsFile = path.join(stateDir, "last-update-check");
   const cooldownMs =

@@ -159,19 +159,7 @@ async function main() {
       return;
     }
 
-    const pkgName = pkg.name;
-    const IS_WINDOWS = process.platform === "win32";
-    const result = spawnSync("npm", ["i", "-g", `${pkgName}@${latestVersion}`], {
-      encoding: "utf8",
-      timeout: 120000,
-      shell: IS_WINDOWS,
-    });
-
-    if (result.status === 0) {
-      removeHint();
-    } else {
-      writeHint(latestVersion, pkgName);
-    }
+    writeHint(latestVersion, pkg.name);
   } catch (_) {
   } finally {
     releaseLock();
